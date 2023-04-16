@@ -1,13 +1,21 @@
-const { register, login, updateImage } = require('../Controllers/AuthController')
-const { checkUser } = require('../Middlewares/AuthMiddlewares')
+const { register, login, updateImage, adminLogin, getAllUsers, editUser } = require('../Controllers/AuthController')
+const { checkUser, checkAdmin } = require('../Middlewares/AuthMiddlewares')
 const router = require('express').Router()
 const upload = require("../Middlewares/multer")
 
 
-router.post('/',checkUser)
-router.post('/register',register)
-router.post('/login',login)
-router.post('/profile',upload.single("image"),updateImage)
+router.post('/', checkUser)
+router.post('/register', register)
+router.post('/login', login)
+router.post('/profile', upload.single("image"), updateImage)
+
+// ----- ADMIN -----
+
+router.post('/admin/login', adminLogin)
+router.post('/admin', checkAdmin)
+router.get("/getallusers", getAllUsers)
+router.post("/admin/adduser", register)
+router.post("/admin/edit-user", editUser)
 
 
 module.exports = router
