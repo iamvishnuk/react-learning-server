@@ -72,19 +72,22 @@ module.exports.updateImage = async (req, res, next) => {
         const userId = req.body.userId
         const imageUrl = req.file.filename
         const alreadyImage = await UserModel.findOne({ _id: userId })
+        console.log(alreadyImage.image)
 
-        fs.unlink(path.join(__dirname, `../../client/public/images/`, alreadyImage.image), (err) => {
-            if (err) {
-                console.log(err)
-            } else {
-                console.log("image deleted")
-            }
-        })
+        if(alreadyImage.image !== undefined) {
+            fs.unlink(path.join(__dirname, "../../client/public/images/", alreadyImage.image), (err) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("image deleted")
+                }
+            })
+        }
 
         const image = await UserModel.updateOne({ _id: userId }, { $set: { image: imageUrl } }).then((res) => {
             console.log(res)
         })
-        console.log(image)
+        // console.log(image)
         res.status(201).json({ updated: true, imageUrl: imageUrl })
 
 
@@ -110,7 +113,7 @@ module.exports.adminLogin = async (req, res, next) => {
             if (admin.password === password) {
 
                 const token = createToken(admin._id)
-                res.cookie("adminjwt",token,{
+                res.cookie("adminjwt", token, {
                     withCredentials: true,
                     httpOnly: false,
                     maxAge: maxAge * 1000
@@ -147,9 +150,22 @@ module.exports.editUser = async (req, res, next) => {
         const { userId, userEmail } = req.body
         console.log(req.body)
         console.log(userId, userEmail)
-        await UserModel.updateOne({_id: userId},{$set:{email:userEmail}})
-        res.status(201).json({update: true})
-        
+        await UserModel.updateOne({ _id: userId }, { $set: { email: userEmail } })
+        res.status(201).json({ update: true })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports.deleteUser = async (req, res, next) => {
+    try {
+
+        const userId = req.params.id
+        await UserModel.deleteOne({ _id: userId }).then(() => {
+            res.status(200).json({ deleted: true })
+        })
+
     } catch (error) {
         console.log(error)
     }
